@@ -132,6 +132,12 @@ namespace powerAuth
 		 */
 		ErrorCode loadSessionState(const cc7::ByteRange & serialized_state);
 		
+       /**
+        Migrate session state from previous PowerAuthModule to new one. If empty data are returned session state is
+        invalid.
+        */
+       static cc7::ByteArray migrateSessionState(const std::string  & previous_serialized_state);
+		
 		
 		// MARK: - Activation -
 		

@@ -495,4 +495,13 @@ public class Session {
      for all other situations, when the generated random key is required.
      */
 	public native byte[] generateSignatureUnlockKey();
+
+	/**
+	 *
+	 * PA serialized state migration
+	 *
+	 * @param state serialized state saved by previous version of PA
+	 * @return PA serialized state converted to new PA2 format
+	 */
+	public native byte[] migrateState(String state);
 }

@@ -105,6 +105,15 @@
  */
 - (BOOL) deserializeState:(nonnull NSData *)state;
 
+/** Migrate session state from PowerAuth 2 to PowerAuth 3 module.
+
+ This method migrate old data structure to new one, so we can use PowerAuth 3 version of PersistentData. If empty data are returned session state is invalid.
+
+ @param state Current migrated state.
+ @return NSData migrated state.
+ */
++ (nonnull NSData*) migrateState:(nonnull NSString*)state;
+
 
 // Activation
 

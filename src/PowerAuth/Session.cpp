@@ -162,6 +162,94 @@ namespace powerAuth
 		return result ? EC_Ok : EC_WrongParam;
 	}
 	
+    cc7::ByteArray Session::migrateSessionState(const std::string  & previous_serialized_state)
+   {
+       cc7::ByteArray decodedState, pamHeader, activationId, passwordSalt, serializedData, emptyArray;
+       cc7::byte isActivated;
+       cc7::U16 activationIdSize, passwordSaltSize, signatureKeysSize, serverPublicKeySize, DevicePrivateKeySize;
+       int IOT_HEADER_SIZE = 4;
+       char activatedFlag = 'a', powerAuthVersion = '2';
+
+       // Create new PD structure.
+       protocol::PersistentData *new_data = new protocol::PersistentData();
+
+       // Decode Base64 string (previous state was encoded when stored).
+       decodedState.readFromBase64String(previous_serialized_state);
+
+       // Read data.
+       utils::DataReader reader(decodedState);
+
+       // First of all read header. Header should containt string 'PAM2'.
+       reader.readMemory(pamHeader, IOT_HEADER_SIZE);
+
+       // Check if version match.
+       if (pamHeader[3] != powerAuthVersion) {
+           return emptyArray;
+       }
+
+       // Read activation state. For 'a' is activated and for 'i' is not.
+       reader.readByte(isActivated);
+
+       // If activation is not active fallback.
+       if (isActivated != activatedFlag) {
+           return emptyArray;
+       }
+
+       // NOTE: Previous implementation of module state has different size checking.
+       // We have to always read 16 bits and determine size of following datas.
+       // Then read memory with this size.
+
+       // Read ActivationId.
+       reader.readU16(activationIdSize);
+       reader.readMemory(activationId, activationIdSize);
+       new_data->activationId = CopyToString(activationId);
+
+       // Read Counter
+       reader.readU64(new_data->signatureCounter);
+
+       // Read Flags
+       reader.readU32(new_data->flagsU32);
+
+       // Read PasswordSalt
+       reader.readU16(passwordSaltSize);
+       reader.readMemory(passwordSalt, passwordSaltSize);
+       new_data->passwordSalt = passwordSalt;
+
+       // Read PasswordIterations
+       reader.readU32(new_data->passwordIterations);
+
+       // Read Signature Keys
+       reader.readU16(signatureKeysSize);
+       reader.readMemory(new_data->sk.possessionKey, signatureKeysSize);
+
+       reader.readU16(signatureKeysSize);
+       reader.readMemory(new_data->sk.knowledgeKey, signatureKeysSize);
+
+       reader.readU16(signatureKeysSize);
+       reader.readMemory(new_data->sk.biometryKey, signatureKeysSize);
+
+       reader.readU16(signatureKeysSize);
+       reader.readMemory(new_data->sk.transportKey, signatureKeysSize);
+
+       // Read Asymetric keys.
+       reader.readU16(serverPublicKeySize);
+       reader.readMemory(new_data->serverPublicKey, serverPublicKeySize);
+
+       reader.readU16(DevicePrivateKeySize);
+       reader.readMemory(new_data->cDevicePrivateKey, DevicePrivateKeySize);
+
+       // Create serialized data for new PD.
+       cc7::byte flags = 0;
+       flags |= HAS_PERSISTENT_DATA;
+       utils::DataWriter writer;
+       writer.openVersion(DATA_TAG, DATA_VER);
+       writer.writeByte(flags);
+       protocol::SerializePersistentData(*new_data, writer);
+       writer.closeVersion();
+       serializedData = writer.serializedData();
+
+       return serializedData;
+   }
 	
 	
 	// MARK: - Activation -
