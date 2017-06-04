@@ -77,7 +77,7 @@ namespace protocol
 		bool result = ValidateSignatureKeys(pd.sk, expectedFactor);
 		result = result && pd.passwordIterations >= PBKDF2_PASS_ITERATIONS && pd.passwordSalt.size() == PBKDF2_SALT_SIZE;
 		result = result && pd.activationId.length()  > 0;
-		result = result && pd.serverPublicKey.size() > 0 && pd.devicePublicKey.size() > 0;
+		result = result && pd.serverPublicKey.size() > 0;
 		result = result && pd.cDevicePrivateKey.size() > 0;
 		return result;
 	}
