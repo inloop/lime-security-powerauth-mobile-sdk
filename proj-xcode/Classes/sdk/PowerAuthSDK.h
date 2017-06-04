@@ -351,6 +351,6 @@
  @param state Current migrated state.
  @return NSData migrated state.
  */
-+ (nonnull NSData*) migrateState:(nonnull NSString*)state;
++ (nonnull NSData*) migrateSessionState:(nonnull NSString*)state;
 
 @end

@@ -503,5 +503,5 @@ public class Session {
 	 * @param state serialized state saved by previous version of PA
 	 * @return PA serialized state converted to new PA2 format
 	 */
-	public native byte[] migrateState(String state);
+	public native byte[] migrateSessionState(String state);
 }

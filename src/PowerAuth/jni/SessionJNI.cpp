@@ -671,4 +671,14 @@ CC7_JNI_METHOD(jbyteArray, generateSignatureUnlockKey)
 	return cc7::jni::CopyToJavaByteArray(env, Session::generateSignatureUnlockKey());
 }
 
+//
+// public native byte[] migrateSessionState(String state);
+//
+CC7_JNI_METHOD_PARAMS(jbyteArray, migrateSessionState, jstring state)
+{
+	// Load parameters into C++ objects
+	std::string cppState = cc7::jni::CopyFromJavaString(env, state);
+	return cc7::jni::CopyToJavaByteArray(env, Session::migrateSessionState(cppState));
+}
+
 CC7_JNI_MODULE_CLASS_END()
